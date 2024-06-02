@@ -44,7 +44,7 @@ typedef struct {
 
 int main(int argc, char** argv){
     size_t game_ends_at = GAME_ENDS_AT;
-    size_t width = 800;
+    size_t width = 1000;
 
     struct option long_options[] = {
         {"points", required_argument, NULL, 'p'},
