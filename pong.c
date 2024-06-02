@@ -11,6 +11,7 @@
 #define PLAYER_LINE_LENGTH 100.0f
 #define PLAYER_LINE_THICCNESS 20.0f
 #define PLAYER_STEP 20.0f
+#define GAME_ENDS_AT 1
 
 typedef struct {
     Vector2 starting;
@@ -39,6 +40,7 @@ int main(int argc, char** argv){
     SetTargetFPS(TARGET_FPS);
     int w = GetScreenWidth();
     int h = GetScreenHeight();
+    int game_over = 0;
 
     Score score = {0};
 
@@ -60,58 +62,61 @@ int main(int argc, char** argv){
 
     Vector2 velocity = {BALL_VELOCITY, BALL_VELOCITY};
     while (!WindowShouldClose()) {
-        if(IsKeyDown(KEY_W)){
-            move_line(&p1, -PLAYER_STEP);
-        } else if (IsKeyDown(KEY_S)) {
-            move_line(&p1, PLAYER_STEP);
-        }
-        
-        if(IsKeyDown(KEY_UP)){
-            move_line(&p2, -PLAYER_STEP);
-        } else if (IsKeyDown(KEY_DOWN)) {
-            move_line(&p2, PLAYER_STEP);
-        }
-
-        p1.starting = Vector2Clamp(p1.starting, (Vector2){0,0}, (Vector2){w,h - PLAYER_LINE_LENGTH});
-        p1.ending = Vector2Clamp(p1.ending, (Vector2){0, PLAYER_LINE_LENGTH}, (Vector2){w,h});
-
-        p2.starting = Vector2Clamp(p2.starting, (Vector2){0,0}, (Vector2){w,h - PLAYER_LINE_LENGTH});
-        p2.ending = Vector2Clamp(p2.ending, (Vector2){0, PLAYER_LINE_LENGTH}, (Vector2){w,h});
-
-        float nx = ball.x + velocity.x * TARGET_DT;
-        float ny = ball.y + velocity.y * TARGET_DT;
-        
-        if (nx - BALL_RADIUS <= 0) {
-            score.p2++;
-            velocity.x = BALL_VELOCITY;
-            ball.x = w/2.0f;
-            ball.y = h/2.0f;
-        } else if (nx + BALL_RADIUS >= w) {
-            score.p1++;
-            velocity.x = -BALL_VELOCITY;
-            ball.x = w/2.0f;
-            ball.y = h/2.0f;
-        } else if (ball_collides_with_player(p1, ball)) {
-            ball.x = p1.starting.x + BALL_RADIUS + PLAYER_LINE_THICCNESS / 2 + 1.0f;
-            velocity.x = BALL_VELOCITY;
-        } else if (ball_collides_with_player(p2, ball)) {
-            ball.x = p2.starting.x - BALL_RADIUS - PLAYER_LINE_THICCNESS / 2 - 1.0f;
-            velocity.x = -BALL_VELOCITY;
-        } else {
-            ball.x = nx;
-        }
-
-        if (ny - BALL_RADIUS <= 0) {
-            ball.y = BALL_RADIUS;
-            velocity.y = BALL_VELOCITY;
-        } else if (ny + BALL_RADIUS >= h) {
-            ball.y = h - BALL_RADIUS;
-            velocity.y = -BALL_VELOCITY;
-        } else {
-            ball.y = ny;
-        }
-
         BeginDrawing();
+        if(!game_over){
+            if(score.p1 == GAME_ENDS_AT || score.p2 == GAME_ENDS_AT) game_over = 1;
+
+            if(IsKeyDown(KEY_W)){
+                move_line(&p1, -PLAYER_STEP);
+            } else if (IsKeyDown(KEY_S)) {
+                move_line(&p1, PLAYER_STEP);
+            }
+
+            if(IsKeyDown(KEY_UP)){
+                move_line(&p2, -PLAYER_STEP);
+            } else if (IsKeyDown(KEY_DOWN)) {
+                move_line(&p2, PLAYER_STEP);
+            }
+
+            p1.starting = Vector2Clamp(p1.starting, (Vector2){0,0}, (Vector2){w,h - PLAYER_LINE_LENGTH});
+            p1.ending = Vector2Clamp(p1.ending, (Vector2){0, PLAYER_LINE_LENGTH}, (Vector2){w,h});
+
+            p2.starting = Vector2Clamp(p2.starting, (Vector2){0,0}, (Vector2){w,h - PLAYER_LINE_LENGTH});
+            p2.ending = Vector2Clamp(p2.ending, (Vector2){0, PLAYER_LINE_LENGTH}, (Vector2){w,h});
+
+            float nx = ball.x + velocity.x * TARGET_DT;
+            float ny = ball.y + velocity.y * TARGET_DT;
+
+            if (nx - BALL_RADIUS <= 0) {
+                score.p2++;
+                velocity.x = BALL_VELOCITY;
+                ball.x = w/2.0f;
+                ball.y = h/2.0f;
+            } else if (nx + BALL_RADIUS >= w) {
+                score.p1++;
+                velocity.x = -BALL_VELOCITY;
+                ball.x = w/2.0f;
+                ball.y = h/2.0f;
+            } else if (ball_collides_with_player(p1, ball)) {
+                ball.x = p1.starting.x + BALL_RADIUS + PLAYER_LINE_THICCNESS / 2 + 1.0f;
+                velocity.x = BALL_VELOCITY;
+            } else if (ball_collides_with_player(p2, ball)) {
+                ball.x = p2.starting.x - BALL_RADIUS - PLAYER_LINE_THICCNESS / 2 - 1.0f;
+                velocity.x = -BALL_VELOCITY;
+            } else {
+                ball.x = nx;
+            }
+
+            if (ny - BALL_RADIUS <= 0) {
+                ball.y = BALL_RADIUS;
+                velocity.y = BALL_VELOCITY;
+            } else if (ny + BALL_RADIUS >= h) {
+                ball.y = h - BALL_RADIUS;
+                velocity.y = -BALL_VELOCITY;
+            } else {
+                ball.y = ny;
+            }
+
             ClearBackground(BLACK);
 
             DrawCircleV(ball, BALL_RADIUS, WHITE);
@@ -121,7 +126,22 @@ int main(int argc, char** argv){
 
             DrawText(TextFormat("%zu", score.p1), w/2-300, 80, 120, WHITE);
             DrawText(TextFormat("%zu", score.p2), w/2+300, 80, 120, WHITE);
-            DrawText(TextFormat("%4.0f, %4.0f", ball.x, ball.y), 10, 10, 30, WHITE);
+        } else {
+            if(IsKeyPressed(KEY_SPACE)){
+                game_over = 0;
+                score = (Score) {0, 0};
+            }
+
+            ClearBackground(BLACK);
+            const char* first_text = TextFormat("Player %d won %zu-%zu", (score.p1 < score.p2) + 1, score.p1, score.p2);
+            size_t first_size = MeasureText(first_text, 100);
+
+            const char* second_text = "Press SPACE to play again";
+            size_t second_size = MeasureText(second_text, 70);
+
+            DrawText(first_text, w/2.0f - first_size/2.0f, h/2 - 100/2, 100, WHITE);
+            DrawText(second_text, w/2.0f - second_size/2.0f, h/2 + 100, 70, WHITE);
+        }
         EndDrawing();
     }
 
