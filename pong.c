@@ -11,7 +11,7 @@
 #define PLAYER_LINE_LENGTH 100.0f
 #define PLAYER_LINE_THICCNESS 20.0f
 #define PLAYER_STEP 20.0f
-#define GAME_ENDS_AT 1
+#define GAME_ENDS_AT 5
 
 typedef struct {
     Vector2 starting;
