@@ -1,7 +1,15 @@
 #include "raylib.h"
 #include "raymath.h"
+#include <bits/getopt_core.h>
 #include <math.h>
 #include <stdlib.h>
+#include <getopt.h>
+
+#define CLIB_IMPLEMENTATION
+#include "clib.h"
+
+#define GAME_NAME "Pong"
+#define GAME_VERSION "1.0.0"
 
 #define TARGET_FPS 60
 #define TARGET_DT (1.0f/TARGET_FPS)
@@ -36,7 +44,42 @@ typedef struct {
 } Score;
 
 int main(int argc, char** argv){
-    InitWindow(1600, 900, "Pong");
+    size_t game_ends_at = GAME_ENDS_AT;
+    size_t width = 800;
+
+    struct option long_options[] = {
+        {"points", required_argument, NULL, 'p'},
+        {"version", no_argument, NULL, 'v'},
+        {"width", required_argument, NULL, 'w'},
+        {"speed", required_argument, NULL, 's'},
+        {NULL, 0, NULL, 0}
+    };
+
+    int opt;
+	while ((opt = getopt_long(argc, argv, "vp:w:s:", long_options, NULL)) != -1) {
+        switch (opt) {
+            case 'v':
+                printf("%s v%s by KDesp73\n", GAME_NAME, GAME_VERSION);
+                exit(0);
+                break;
+            case 'p':
+                game_ends_at = atoi(optarg);
+                break;
+            case 'w':
+                width = atoi(optarg);
+                if(width < 500){
+                    ERRO("Width too small. Should be above 500");
+                    exit(1);
+                }
+                break;
+            default:
+                INFO("Usage: %s [-p <points>] [-w <width>]", argv[0]);
+                exit(1);
+        }
+    }
+
+
+    InitWindow(width, width / 1.6f, GAME_NAME);
     SetTargetFPS(TARGET_FPS);
     int w = GetScreenWidth();
     int h = GetScreenHeight();
@@ -64,7 +107,7 @@ int main(int argc, char** argv){
     while (!WindowShouldClose()) {
         BeginDrawing();
         if(!game_over){
-            if(score.p1 == GAME_ENDS_AT || score.p2 == GAME_ENDS_AT) game_over = 1;
+            if(score.p1 == game_ends_at || score.p2 == game_ends_at) game_over = 1;
 
             if(IsKeyDown(KEY_W)){
                 move_line(&p1, -PLAYER_STEP);
@@ -124,8 +167,8 @@ int main(int argc, char** argv){
             DrawLineEx(p1.starting, p1.ending, PLAYER_LINE_THICCNESS, WHITE);
             DrawLineEx(p2.starting, p2.ending, PLAYER_LINE_THICCNESS, WHITE);
 
-            DrawText(TextFormat("%zu", score.p1), w/2-300, 80, 120, WHITE);
-            DrawText(TextFormat("%zu", score.p2), w/2+300, 80, 120, WHITE);
+            DrawText(TextFormat("%zu", score.p1), w/2-w/4 - MeasureText(TextFormat("%zu", score.p1), 120) / 2, 80, 120, WHITE);
+            DrawText(TextFormat("%zu", score.p2), w/2+w/4 - MeasureText(TextFormat("%zu", score.p2), 120) / 2, 80, 120, WHITE);
         } else {
             if(IsKeyPressed(KEY_SPACE)){
                 game_over = 0;
@@ -134,13 +177,13 @@ int main(int argc, char** argv){
 
             ClearBackground(BLACK);
             const char* first_text = TextFormat("Player %d won %zu-%zu", (score.p1 < score.p2) + 1, score.p1, score.p2);
-            size_t first_size = MeasureText(first_text, 100);
+            size_t first_size = MeasureText(first_text, w/16);
 
             const char* second_text = "Press SPACE to play again";
-            size_t second_size = MeasureText(second_text, 70);
+            size_t second_size = MeasureText(second_text, w/23);
 
-            DrawText(first_text, w/2.0f - first_size/2.0f, h/2 - 100/2, 100, WHITE);
-            DrawText(second_text, w/2.0f - second_size/2.0f, h/2 + 100, 70, WHITE);
+            DrawText(first_text, w/2.0f - first_size/2.0f, h/2 - 100/2, w/16, WHITE);
+            DrawText(second_text, w/2.0f - second_size/2.0f, h/2 + 100, w/23, WHITE);
         }
         EndDrawing();
     }
