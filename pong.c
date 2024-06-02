@@ -67,8 +67,8 @@ int main(int argc, char** argv){
                 printf("\n");
                 printf("-h, --help\t\t\tPrints this message\n");
                 printf("-v, --version\t\t\tPrints the version of this program\n");
-                printf("-p, --points\t\t\tSets the number of points that end the game\n");
-                printf("-w, --width\t\t\tSets the width of the window (>=500)\n");
+                printf("-p, --points\t\t\tSets the number of points that end the game (default: 5)\n");
+                printf("-w, --width\t\t\tSets the width of the window (should be: >=500, default: 800)\n");
                 printf("\n");
 
                 printf("Made by KDesp73\n");
@@ -194,7 +194,7 @@ int main(int argc, char** argv){
             size_t second_size = MeasureText(second_text, w/23);
 
             DrawText(first_text, w/2.0f - first_size/2.0f, h/2 - 100/2, w/16, WHITE);
-            DrawText(second_text, w/2.0f - second_size/2.0f, h/2 + 100, w/23, WHITE);
+            DrawText(second_text, w/2.0f - second_size/2.0f, h/2 + 50, w/23, WHITE);
         }
         EndDrawing();
     }
