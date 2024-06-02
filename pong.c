@@ -1,7 +1,6 @@
 #include "raylib.h"
 #include "raymath.h"
 #include <bits/getopt_core.h>
-#include <math.h>
 #include <stdlib.h>
 #include <getopt.h>
 
@@ -49,19 +48,31 @@ int main(int argc, char** argv){
 
     struct option long_options[] = {
         {"points", required_argument, NULL, 'p'},
-        {"version", no_argument, NULL, 'v'},
         {"width", required_argument, NULL, 'w'},
-        {"speed", required_argument, NULL, 's'},
+        {"version", no_argument, NULL, 'v'},
+        {"help", no_argument, NULL, 'h'},
         {NULL, 0, NULL, 0}
     };
 
     int opt;
-	while ((opt = getopt_long(argc, argv, "vp:w:s:", long_options, NULL)) != -1) {
+	while ((opt = getopt_long(argc, argv, "vp:w:h", long_options, NULL)) != -1) {
         switch (opt) {
             case 'v':
                 printf("%s v%s by KDesp73\n", GAME_NAME, GAME_VERSION);
                 exit(0);
                 break;
+            case 'h':
+                printf("Usage: %s [-p <points>] [-w <width>] [-v | -h]\n", argv[0]);
+
+                printf("\n");
+                printf("-h, --help\t\t\tPrints this message\n");
+                printf("-v, --version\t\t\tPrints the version of this program\n");
+                printf("-p, --points\t\t\tSets the number of points that end the game\n");
+                printf("-w, --width\t\t\tSets the width of the window (>=500)\n");
+                printf("\n");
+
+                printf("Made by KDesp73\n");
+                exit(0);
             case 'p':
                 game_ends_at = atoi(optarg);
                 break;
@@ -73,7 +84,7 @@ int main(int argc, char** argv){
                 }
                 break;
             default:
-                INFO("Usage: %s [-p <points>] [-w <width>]", argv[0]);
+                INFO("Usage: %s [-p <points>] [-w <width>] [-v | -h]", argv[0]);
                 exit(1);
         }
     }
