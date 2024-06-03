@@ -44,30 +44,34 @@ typedef struct {
 
 int main(int argc, char** argv){
     size_t game_ends_at = GAME_ENDS_AT;
+    float ball_speed = BALL_VELOCITY;
     size_t width = 1000;
 
     struct option long_options[] = {
         {"points", required_argument, NULL, 'p'},
         {"width", required_argument, NULL, 'w'},
+        {"speed", required_argument, NULL, 's'},
         {"version", no_argument, NULL, 'v'},
         {"help", no_argument, NULL, 'h'},
         {NULL, 0, NULL, 0}
     };
 
+    Cstr usage = "Usage: %s [-p <points>] [-w <width>] [-s <ball-speed>] [-v | -h]\n";
     int opt;
-	while ((opt = getopt_long(argc, argv, "vp:w:h", long_options, NULL)) != -1) {
+	while ((opt = getopt_long(argc, argv, "vp:w:hs:", long_options, NULL)) != -1) {
         switch (opt) {
             case 'v':
                 printf("%s v%s by KDesp73\n", GAME_NAME, GAME_VERSION);
                 exit(0);
                 break;
             case 'h':
-                printf("Usage: %s [-p <points>] [-w <width>] [-v | -h]\n", argv[0]);
+                printf(usage, argv[0]);
 
                 printf("\n");
                 printf("-h, --help\t\t\tPrints this message\n");
                 printf("-v, --version\t\t\tPrints the version of this program\n");
                 printf("-p, --points\t\t\tSets the number of points that end the game (default: 5)\n");
+                printf("-s, --speed\t\t\tSets the ball speed (type: float, default: 300.0)\n");
                 printf("-w, --width\t\t\tSets the width of the window (should be: >=500, default: 800)\n");
                 printf("\n");
 
@@ -75,6 +79,9 @@ int main(int argc, char** argv){
                 exit(0);
             case 'p':
                 game_ends_at = atoi(optarg);
+                break;
+            case 's':
+                ball_speed = atof(optarg);
                 break;
             case 'w':
                 width = atoi(optarg);
@@ -84,7 +91,7 @@ int main(int argc, char** argv){
                 }
                 break;
             default:
-                INFO("Usage: %s [-p <points>] [-w <width>] [-v | -h]", argv[0]);
+                INFO(usage, argv[0]);
                 exit(1);
         }
     }
@@ -114,7 +121,7 @@ int main(int argc, char** argv){
         .ending = (Vector2) {w-PLAYER_DISTANCE_FROM_WALL, h-PLAYER_DISTANCE_FROM_WALL}
     };
 
-    Vector2 velocity = {BALL_VELOCITY, BALL_VELOCITY};
+    Vector2 velocity = {ball_speed, ball_speed};
     while (!WindowShouldClose()) {
         BeginDrawing();
         if(!game_over){
@@ -143,30 +150,30 @@ int main(int argc, char** argv){
 
             if (nx - BALL_RADIUS <= 0) {
                 score.p2++;
-                velocity.x = BALL_VELOCITY;
+                velocity.x = ball_speed;
                 ball.x = w/2.0f;
                 ball.y = h/2.0f;
             } else if (nx + BALL_RADIUS >= w) {
                 score.p1++;
-                velocity.x = -BALL_VELOCITY;
+                velocity.x = -ball_speed;
                 ball.x = w/2.0f;
                 ball.y = h/2.0f;
             } else if (ball_collides_with_player(p1, ball)) {
                 ball.x = p1.starting.x + BALL_RADIUS + PLAYER_LINE_THICCNESS / 2 + 1.0f;
-                velocity.x = BALL_VELOCITY;
+                velocity.x = ball_speed;
             } else if (ball_collides_with_player(p2, ball)) {
                 ball.x = p2.starting.x - BALL_RADIUS - PLAYER_LINE_THICCNESS / 2 - 1.0f;
-                velocity.x = -BALL_VELOCITY;
+                velocity.x = -ball_speed;
             } else {
                 ball.x = nx;
             }
 
             if (ny - BALL_RADIUS <= 0) {
                 ball.y = BALL_RADIUS;
-                velocity.y = BALL_VELOCITY;
+                velocity.y = ball_speed;
             } else if (ny + BALL_RADIUS >= h) {
                 ball.y = h - BALL_RADIUS;
-                velocity.y = -BALL_VELOCITY;
+                velocity.y = -ball_speed;
             } else {
                 ball.y = ny;
             }
@@ -180,6 +187,11 @@ int main(int argc, char** argv){
 
             DrawText(TextFormat("%zu", score.p1), w/2-w/4 - MeasureText(TextFormat("%zu", score.p1), 120) / 2, 80, 120, WHITE);
             DrawText(TextFormat("%zu", score.p2), w/2+w/4 - MeasureText(TextFormat("%zu", score.p2), 120) / 2, 80, 120, WHITE);
+            size_t line_length = h/15.0f;
+            for(size_t i = 0; i < h; i += 2*line_length){
+                DrawLineEx((Vector2){w/2.0f, i}, (Vector2){w/2.0f, i+line_length}, 5.0f, WHITE);
+            }
+            
         } else {
             if(IsKeyPressed(KEY_SPACE)){
                 game_over = 0;
