@@ -196,6 +196,15 @@ int main(int argc, char** argv){
             if(IsKeyPressed(KEY_SPACE)){
                 game_over = 0;
                 score = (Score) {0, 0};
+                velocity = (Vector2) {ball_speed, ball_speed};
+                p1 = (Line){
+                    .starting = (Vector2) {PLAYER_DISTANCE_FROM_WALL, PLAYER_DISTANCE_FROM_WALL},
+                    .ending = (Vector2) {PLAYER_DISTANCE_FROM_WALL, PLAYER_DISTANCE_FROM_WALL + PLAYER_LINE_LENGTH}
+                };
+                p2 = (Line){
+                    .starting = (Vector2) {w-PLAYER_DISTANCE_FROM_WALL, h-(PLAYER_DISTANCE_FROM_WALL + PLAYER_LINE_LENGTH)},
+                    .ending = (Vector2) {w-PLAYER_DISTANCE_FROM_WALL, h-PLAYER_DISTANCE_FROM_WALL}
+                };
             }
 
             ClearBackground(BLACK);
