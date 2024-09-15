@@ -97,6 +97,7 @@ int main(int argc, char** argv){
     }
 
 
+    SetTraceLogLevel(LOG_WARNING);
     InitWindow(width, width / 1.6f, GAME_NAME);
     SetTargetFPS(TARGET_FPS);
     int w = GetScreenWidth();
