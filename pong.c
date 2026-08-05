@@ -1,6 +1,5 @@
 #include "raylib.h"
 #include "raymath.h"
-#include <bits/getopt_core.h>
 #include <stdlib.h>
 #include <getopt.h>
 
